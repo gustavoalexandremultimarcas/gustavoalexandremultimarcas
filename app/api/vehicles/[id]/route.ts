@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function PUT(
   request: NextRequest,
@@ -12,7 +17,6 @@ export async function PUT(
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const supabase = supabaseAdmin();
   try {
     const { id } = await context.params;
     const vehicleId = parseInt(id);
@@ -154,7 +158,6 @@ export async function DELETE(
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const supabase = supabaseAdmin();
   try {
     const { id } = await context.params;
     const vehicleId = parseInt(id);
@@ -202,7 +205,6 @@ async function uploadToStorage(
   file: File,
   vehicleId: number
 ): Promise<{ url: string; meta: any }> {
-  const supabase = supabaseAdmin();
   const filename = `${crypto.randomUUID()}.webp`;
   const path = `vehicles/${vehicleId}/${filename}`;
 
