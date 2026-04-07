@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import InnerImageZoom from "react-inner-image-zoom"
 import "react-inner-image-zoom/lib/InnerImageZoom/styles.css"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { WEBHOOK_URL, WEBHOOK_AUTH, STORE_WHATSAPP_LINK, STORE_PHONE, STORE_ADDRESS, STORE_CITY_STATE } from "@/lib/config"
+import { STORE_WHATSAPP_LINK, STORE_PHONE, STORE_ADDRESS, STORE_CITY_STATE } from "@/lib/config"
 import { thumbUrlFromMeta } from "@/utils/thumb"
 
 import { Calendar, Fuel, Settings, ArrowLeft, Phone, MessageCircle, Gauge, MapPin, Shield } from "lucide-react"
@@ -203,11 +203,10 @@ export default function VehicleDetailsPage() {
       mensagem: message,
     }
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: WEBHOOK_AUTH,
         },
         body: JSON.stringify(payload),
       })

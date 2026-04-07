@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 import { Calendar, Fuel, Settings, Search, X } from "lucide-react"
-import { WEBHOOK_URL, WEBHOOK_AUTH } from "@/lib/config"
 
 type PublicVehicle = {
   id: number
@@ -134,11 +133,10 @@ export default function VeiculosPage() {
       interesse: interesseModal,
     }
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: WEBHOOK_AUTH,
         },
         body: JSON.stringify(payload),
       })

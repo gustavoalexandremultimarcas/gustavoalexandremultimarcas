@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogFooter
 } from "@/components/ui/dialog"
-import { WEBHOOK_URL, WEBHOOK_AUTH, STORE_NAME } from "@/lib/config"
+import { STORE_NAME } from "@/lib/config"
 
 export function HeroSection() {
   const [showSimulacaoModal, setShowSimulacaoModal] = useState(false)
@@ -55,11 +55,10 @@ export function HeroSection() {
     }
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": WEBHOOK_AUTH
         },
         body: JSON.stringify(payload)
       })

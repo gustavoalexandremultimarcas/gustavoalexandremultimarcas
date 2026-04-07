@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { WEBHOOK_URL, WEBHOOK_AUTH } from "@/lib/config";
 
 type VehicleOption = {
   id: number;
@@ -105,11 +104,10 @@ export function SimulacaoModal({
     };
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: WEBHOOK_AUTH,
         },
         body: JSON.stringify(payload),
       });

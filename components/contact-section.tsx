@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { MapPin, Phone, MessageCircle, Clock, Mail } from "lucide-react"
 import { useState, useEffect } from "react"
-import { WEBHOOK_URL, WEBHOOK_AUTH, STORE_ADDRESS, STORE_CITY_STATE, STORE_PHONE, STORE_EMAIL, MAPS_LINK, MAPS_EMBED } from "@/lib/config"
+import { STORE_ADDRESS, STORE_CITY_STATE, STORE_PHONE, STORE_EMAIL, MAPS_LINK, MAPS_EMBED } from "@/lib/config"
 
 export function ContactSection() {
   const [contactName, setContactName] = useState("")
@@ -43,11 +43,10 @@ export function ContactSection() {
     }
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch("/api/leads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": WEBHOOK_AUTH
         },
         body: JSON.stringify(payload)
       })

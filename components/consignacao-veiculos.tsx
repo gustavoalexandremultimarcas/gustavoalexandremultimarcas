@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { WEBHOOK_URL, WEBHOOK_AUTH } from "@/lib/config"
 
 export function ConsignarVeiculoForm({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [nome, setNome] = useState("")
@@ -42,11 +41,8 @@ export function ConsignarVeiculoForm({ isOpen, onClose }: { isOpen: boolean; onC
     if (anexo) formData.append("anexo", anexo)
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch("/api/leads", {
         method: "POST",
-        headers: {
-          "Authorization": WEBHOOK_AUTH
-        },
         body: formData
       })
 
@@ -167,13 +163,23 @@ export function ConsignarVeiculoForm({ isOpen, onClose }: { isOpen: boolean; onC
                 id="anexo"
                 name="anexo"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png"
                 onChange={(e) => {
                   const file = e.target.files?.[0]
                   if (file) {
                     if (!file.type.startsWith("image/")) {
                       alert("Apenas arquivos de imagem são permitidos.")
                       e.target.value = ""
+                      return
+                    }
+
+                    const isWebp =
+                      file.type === "image/webp" ||
+                      file.name?.toLowerCase().endsWith(".webp")
+                    if (isWebp) {
+                      alert("Formato não aceito: WebP. Envie a imagem em JPG ou PNG.")
+                      e.target.value = ""
+                      setAnexo(null)
                       return
                     }
 
