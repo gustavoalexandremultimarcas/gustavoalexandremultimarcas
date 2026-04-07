@@ -10,14 +10,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-import { Calendar, Fuel, Settings, Search } from "lucide-react"
+import { Calendar, Fuel, Settings, Search, X } from "lucide-react"
 import { WEBHOOK_URL, WEBHOOK_AUTH } from "@/lib/config"
-import { useSearchParams } from "next/navigation"
 
 type PublicVehicle = {
   id: number
@@ -84,9 +82,6 @@ function CardImage({ src, alt, badge }: { src?: string | null; alt: string; badg
 }
 
 export default function VeiculosPage() {
-  const searchParams = useSearchParams()
-  const isElectricOnly = searchParams.get("electric") === "true"
-
   const [allVehicles, setAllVehicles] = useState<PublicVehicle[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -99,9 +94,6 @@ export default function VeiculosPage() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedBrand, setSelectedBrand] = useState("")
-  const [selectedYear, setSelectedYear] = useState("")
-  const [selectedPrice, setSelectedPrice] = useState("")
 
   useEffect(() => {
     let active = true
@@ -165,33 +157,14 @@ export default function VeiculosPage() {
   }
 
   const filteredVehicles = useMemo(() => {
-    const parsePrice = (p?: string | null) => {
-      if (!p) return 0
-      const n = parseInt(p.replace(/\D/g, ""), 10)
-      return isNaN(n) ? 0 : n
-    }
+    const q = searchTerm.trim().toLowerCase()
+    if (!q) return allVehicles ?? []
 
     return (allVehicles ?? []).filter((vehicle) => {
-      const matchesElectric =
-        !isElectricOnly ||
-        (vehicle.fuel || "").toLowerCase().includes("elétr") ||
-        (vehicle.fuel || "").toLowerCase().includes("eletric")
-
-      const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesBrand = selectedBrand === "" || selectedBrand === "all" || vehicle.brand === selectedBrand
-      const matchesYear = selectedYear === "" || selectedYear === "all" || vehicle.year === selectedYear
-
-      const price = parsePrice(vehicle.price)
-      const matchesPrice =
-        selectedPrice === "" ||
-        selectedPrice === "all" ||
-        (selectedPrice === "ate-50k" && price <= 50000) ||
-        (selectedPrice === "50k-80k" && price > 50000 && price <= 80000) ||
-        (selectedPrice === "acima-80k" && price > 80000)
-
-      return matchesElectric && matchesSearch && matchesBrand && matchesYear && matchesPrice
+      const name = (vehicle.name || "").toLowerCase()
+      return name.includes(q)
     })
-  }, [allVehicles, isElectricOnly, searchTerm, selectedBrand, selectedYear, selectedPrice])
+  }, [allVehicles, searchTerm])
 
   const totalDisponiveis = allVehicles.length
 
@@ -214,54 +187,26 @@ export default function VeiculosPage() {
       {/* Filters Section */}
       <section className="py-8 bg-gray-50">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-5 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div className="grid grid-cols-1 gap-4">
+            <div className="relative w-full">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="Buscar veículo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="w-full h-11 rounded-xl bg-white pl-11 pr-11 border border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:ring-offset-0"
               />
+              {searchTerm.trim().length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  aria-label="Limpar busca"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <Select value={selectedBrand} onValueChange={setSelectedBrand}>
-              <SelectTrigger><SelectValue placeholder="Marca" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as marcas</SelectItem>
-                <SelectItem value="Honda">Honda</SelectItem>
-                <SelectItem value="Chevrolet">Chevrolet</SelectItem>
-                <SelectItem value="Nissan">Nissan</SelectItem>
-                <SelectItem value="Toyota">Toyota</SelectItem>
-                <SelectItem value="Volkswagen">Volkswagen</SelectItem>
-                <SelectItem value="Hyundai">Hyundai</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger><SelectValue placeholder="Ano" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os anos</SelectItem>
-                <SelectItem value="2023">2023</SelectItem>
-                <SelectItem value="2022">2022</SelectItem>
-                <SelectItem value="2021">2021</SelectItem>
-                <SelectItem value="2020">2020</SelectItem>
-                <SelectItem value="2013">2013</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={selectedPrice} onValueChange={setSelectedPrice}>
-              <SelectTrigger><SelectValue placeholder="Preço" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os preços</SelectItem>
-                <SelectItem value="ate-50k">Até R$ 50.000</SelectItem>
-                <SelectItem value="50k-80k">R$ 50.000 - R$ 80.000</SelectItem>
-                <SelectItem value="acima-80k">Acima de R$ 80.000</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={() => { setSearchTerm(""); setSelectedBrand(""); setSelectedYear(""); setSelectedPrice(""); }}
-              variant="outline"
-            >
-              Limpar Filtros
-            </Button>
           </div>
         </div>
       </section>
