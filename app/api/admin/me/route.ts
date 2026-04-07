@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET() {
   const session = await auth();
@@ -13,6 +8,7 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  const supabase = supabaseAdmin();
   const userId = (session.user as any).id;
   const { data, error } = await supabase
     .from("admin_users")

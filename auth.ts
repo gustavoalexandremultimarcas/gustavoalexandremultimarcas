@@ -1,12 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import bcrypt from "bcryptjs";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -21,6 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = typeof credentials?.password === "string" ? credentials.password : null;
         if (!username || !password) return null;
 
+        const supabase = supabaseAdmin();
         const { data: user, error } = await supabase
           .from("admin_users")
           .select("id, username, password_hash, name")

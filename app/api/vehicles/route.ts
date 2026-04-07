@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import crypto from "crypto";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 const MAX_IMAGES = 10;
 
@@ -22,6 +17,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  const supabase = supabaseAdmin();
   try {
     const formData = await request.formData();
 
@@ -149,6 +145,7 @@ async function uploadToStorage(
   file: File,
   vehicleId: number
 ): Promise<{ url: string; meta: any }> {
+  const supabase = supabaseAdmin();
   // preserva MIME/extensão real
   const mime = file.type || "application/octet-stream";
 
