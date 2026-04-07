@@ -344,7 +344,7 @@ export default function VehicleDetailsPage() {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-semibold mb-4">Descrição</h2>
-                  <p className="text-gray-700 leading-relaxed">{vehicle.description}</p>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{vehicle.description}</p>
                 </CardContent>
               </Card>
             )}

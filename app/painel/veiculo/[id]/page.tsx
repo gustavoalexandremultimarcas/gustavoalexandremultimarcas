@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/auth";
 import { createClient } from "@supabase/supabase-js";
 import VehicleForm from "../../_components/VehicleForm";
 import Link from "next/link";
@@ -37,7 +36,7 @@ export default async function VehicleEditPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) {
     redirect(`/signin?callbackUrl=${encodeURIComponent("/painel")}`);
   }

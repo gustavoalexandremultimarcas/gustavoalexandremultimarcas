@@ -2,8 +2,7 @@
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/auth";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -14,7 +13,7 @@ const supabase = createClient(
 const MAX_IMAGES = 10;
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   try {

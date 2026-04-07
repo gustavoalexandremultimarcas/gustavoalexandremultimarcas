@@ -105,20 +105,20 @@ export default function VeiculosPage() {
 
   useEffect(() => {
     let active = true
-    ;(async () => {
-      try {
-        setLoading(true)
-        const res = await fetch("/api/public/vehicles?availableOnly=1&withFirstImage=1", { cache: "no-store" })
-        const json = await res.json()
-        if (!active) return
-        setAllVehicles((json?.vehicles ?? []) as PublicVehicle[])
-      } catch (e) {
-        console.error("Erro ao carregar veículos:", e)
-        setAllVehicles([])
-      } finally {
-        if (active) setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          setLoading(true)
+          const res = await fetch("/api/public/vehicles?availableOnly=1&withFirstImage=1", { cache: "no-store" })
+          const json = await res.json()
+          if (!active) return
+          setAllVehicles((json?.vehicles ?? []) as PublicVehicle[])
+        } catch (e) {
+          console.error("Erro ao carregar veículos:", e)
+          setAllVehicles([])
+        } finally {
+          if (active) setLoading(false)
+        }
+      })()
     return () => {
       active = false
     }

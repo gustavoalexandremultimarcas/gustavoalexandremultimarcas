@@ -2,8 +2,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/auth";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import LogoutButton from "./_components/LogoutButton";
@@ -47,7 +46,7 @@ export default async function PainelPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) {
     redirect(`/signin?callbackUrl=${encodeURIComponent("/painel")}`);
   }
