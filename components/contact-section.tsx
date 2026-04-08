@@ -68,7 +68,7 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contato" className="py-20 text-white bg-black">
+    <section id="contato" className="py-20 text-white bg-black overflow-x-hidden">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Entre em Contato</h2>
@@ -79,16 +79,16 @@ export function ContactSection() {
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Info */}
-          <div className="space-y-8">
+          <div className="space-y-8 min-w-0">
             <div>
               <h3 className="text-2xl font-semibold mb-6">Informações de Contato</h3>
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <MapPin className="h-6 w-6 text-red-500" />
+                    <MapPin className="h-6 w-6 text-red-500 hidden sm:block" />
                     Endereço
                   </h4>
-                  <div className="rounded-lg overflow-hidden border border-white/10">
+                  <div className="rounded-lg overflow-hidden border border-white/10 w-full max-w-full">
                     <a
                       href={MAPS_LINK}
                       target="_blank"
@@ -103,7 +103,7 @@ export function ContactSection() {
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
-                        className="w-full"
+                        className="w-full max-w-full"
                       ></iframe>
                     </a>
                     <p className="text-gray-300 text-sm text-center mt-2">
@@ -112,24 +112,24 @@ export function ContactSection() {
                   </div>
                 </div>                
 
-                <div className="flex items-start space-x-4">
-                  <MessageCircle className="h-6 w-6 text-red-500 mt-1" />
+                <div className="flex items-start space-x-0 sm:space-x-4">
+                  <MessageCircle className="h-6 w-6 text-red-500 mt-1 hidden sm:block" />
                   <div>
                     <h4 className="font-semibold">WhatsApp</h4>
                     <p className="text-gray-300">{STORE_PHONE}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <Mail className="h-6 w-6 text-red-500 mt-1" />
+                <div className="flex items-start space-x-0 sm:space-x-4">
+                  <Mail className="h-6 w-6 text-red-500 mt-1 hidden sm:block" />
                   <div>
                     <h4 className="font-semibold">Email</h4>
                     <p className="text-gray-300">{STORE_EMAIL}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <Clock className="h-6 w-6 text-red-500 mt-1" />
+                <div className="flex items-start space-x-0 sm:space-x-4">
+                  <Clock className="h-6 w-6 text-red-500 mt-1 hidden sm:block" />
                   <div>
                     <h4 className="font-semibold">Horário de Funcionamento</h4>
                     <p className="text-gray-300">
@@ -153,9 +153,9 @@ export function ContactSection() {
             </div>
           </div>
 
-          <div id="contato-footer" className="flex flex-col justify-end h-full">
-            <Card className="bg-white text-gray-900">
-              <CardContent className="p-8">
+          <div id="contato-footer" className="flex flex-col justify-end h-full min-w-0">
+            <Card className="bg-white text-gray-900 w-full max-w-full">
+              <CardContent className="p-6 sm:p-8">
                 <h3 className="text-2xl font-semibold mb-6">Envie sua Mensagem</h3>
                 {feedback ? (
                   <p className={`mb-4 ${feedback.type === "success" ? "text-green-600" : "text-red-600"}`}>
