@@ -43,7 +43,7 @@ function CardImage({ src, alt, badge }: { src?: string | null; alt: string; badg
     const m = u.match(/^(https?:\/\/[^/]+)\/storage\/v1\/object\/public\/(vehicles-media\/.+)$/)
     if (!m) return u
     // devolve render com width/quality (thumb)
-    return `${m[1]}/storage/v1/render/image/public/${m[2]}?width=640&quality=75`
+    return `${m[1]}/storage/v1/render/image/public/${m[2]}?quality=75`
   }
 
   const original = src || PLACEHOLDER
@@ -58,7 +58,7 @@ function CardImage({ src, alt, badge }: { src?: string | null; alt: string; badg
   }, [src])
 
   return (
-    <div className="w-full aspect-[4/3] relative overflow-hidden">
+    <div className="w-full aspect-[1270/953] relative overflow-hidden">
       <Image
         key={currentSrc}                     // força recriar quando trocar a primeira imagem
         src={currentSrc || PLACEHOLDER}
@@ -233,7 +233,7 @@ export default function VeiculosPage() {
                     <CardContent className="p-6">
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">{vehicle.name}</h3>
                       {vehicle.price && <div className="text-2xl font-bold text-red-600 mb-2">{vehicle.price}</div>}
-                      {vehicle.description && <p className="text-gray-600 text-sm mb-4 truncate">{vehicle.description}</p>}
+                      {/* {vehicle.description && <p className="text-gray-600 text-sm mb-4 truncate">{vehicle.description}</p>} */}
                       <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-4">
                         <div className="flex items-center space-x-1"><Calendar className="h-4 w-4" /><span>{vehicle.year ?? "—"}</span></div>
                         <div className="flex items-center space-x-1"><Fuel className="h-4 w-4" /><span>{vehicle.fuel ?? "—"}</span></div>

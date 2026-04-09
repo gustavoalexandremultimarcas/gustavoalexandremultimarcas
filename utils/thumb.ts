@@ -6,7 +6,7 @@ export function thumbUrlFromMeta(meta?: any, fallback?: string) {
     // render API do Supabase
     return `${base}/storage/v1/render/image/public/vehicles-media/${encodeURIComponent(
       path
-    )}?width=320&quality=70`;
+    )}?quality=70`;
   }
   return fallback || "/images/placeholder.webp";
 }

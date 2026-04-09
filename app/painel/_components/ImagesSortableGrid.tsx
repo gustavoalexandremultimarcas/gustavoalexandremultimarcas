@@ -28,6 +28,9 @@ export type UiImage = {
 
 const PLACEHOLDER = "/images/placeholder.webp";
 
+/** Proporção padrão das fotos de veículo (mesma do site público) */
+const VEHICLE_IMAGE_ASPECT = "aspect-[1270/953]";
+
 // utilitário p/ id estável
 const uid = () =>
   (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2));
@@ -75,16 +78,14 @@ function SortableThumb({
       style={style}
       {...attributes}
       {...listeners}
-      className="relative rounded-md overflow-hidden border bg-white"
+      className={`relative rounded-md overflow-hidden border bg-white ${VEHICLE_IMAGE_ASPECT}`}
     >
       {isLocalPreview ? (
         // blob local: use <img> simples (Next/Image não precisa aqui)
         <img
           src={displaySrc}
           alt={`Imagem ${index + 1}`}
-          width={240}
-          height={160}
-          className="w-full h-40 object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
           draggable={false}
           onError={() => setDisplaySrc(PLACEHOLDER)}
         />
@@ -94,9 +95,9 @@ function SortableThumb({
           key={displaySrc}                 // força recriar quando o src muda
           src={displaySrc || PLACEHOLDER}
           alt={`Imagem ${index + 1}`}
-          width={240}
-          height={160}
-          className="w-full h-40 object-cover"
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover"
           draggable={false}
           unoptimized                      // evita inconsistências em domínios externos
           onError={() => {
@@ -216,7 +217,9 @@ export function ImagesSortableGrid({
             ))}
 
             {canAdd && (
-              <label className="border-2 border-dashed rounded-md h-40 flex items-center justify-center text-sm text-gray-500 cursor-pointer">
+              <label
+                className={`border-2 border-dashed rounded-md flex items-center justify-center text-sm text-gray-500 cursor-pointer ${VEHICLE_IMAGE_ASPECT}`}
+              >
                 <input
                   type="file"
                   accept="image/webp,image/jpeg,image/png"

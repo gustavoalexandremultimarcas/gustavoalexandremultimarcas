@@ -61,7 +61,7 @@ export function EletricosVeiculos() {
     return (
       <div key={vehicle.id} className="w-full md:w-[330px] h-[500px] flex">
         <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col justify-between w-full">
-          <div className="w-full aspect-[4/3] relative overflow-hidden">
+          <div className="w-full aspect-[1270/953] relative overflow-hidden">
             {isSvg ? (
               <img
                 src={img}

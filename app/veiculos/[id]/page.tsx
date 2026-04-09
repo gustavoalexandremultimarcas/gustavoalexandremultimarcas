@@ -273,15 +273,15 @@ export default function VehicleDetailsPage() {
 
             <Card>
               <CardContent className="p-0">
-                <div className="relative">
+                <div className="relative w-full aspect-[1270/953] overflow-hidden rounded-t-lg">
                   <Image
                     src={safeSrc(thumbs[selectedImage])}
                     alt={`${vehicle.name} - imagem ${selectedImage + 1}`}
-                    width={1200}
-                    height={900}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
                     // pular otimização para evitar edge cases com URLs remotas
                     unoptimized
-                    className="w-full h-80 object-cover rounded-t-lg cursor-zoom-in"
+                    className="object-cover cursor-zoom-in"
                     onClick={() => setIsModalOpen(true)}
                     onError={() => setBrokenIdx(selectedImage)}
                   />
@@ -292,15 +292,15 @@ export default function VehicleDetailsPage() {
                       <button
                         key={idx}
                         onClick={() => setSelectedImage(idx)}
-                        className={`relative rounded-lg overflow-hidden ${selectedImage === idx ? "ring-2 ring-red-600" : ""}`}
+                        className={`relative w-full aspect-[1270/953] rounded-lg overflow-hidden ${selectedImage === idx ? "ring-2 ring-red-600" : ""}`}
                       >
                         <Image
                           src={img || "/images/placeholder.webp"}
                           alt={`${vehicle.name} miniatura ${idx + 1}`}
-                          width={300}
-                          height={200}
+                          fill
+                          sizes="(max-width: 768px) 25vw, 120px"
                           unoptimized
-                          className="w-full h-20 object-cover"
+                          className="object-cover"
                           onError={(e) => {
                             (e.currentTarget as HTMLImageElement).src = "/images/placeholder.webp"
                           }}
