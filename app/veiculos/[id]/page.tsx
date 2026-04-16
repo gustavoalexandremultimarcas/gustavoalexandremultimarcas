@@ -20,7 +20,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { STORE_WHATSAPP_LINK, STORE_PHONE, STORE_ADDRESS, STORE_CITY_STATE } from "@/lib/config"
 import { thumbUrlFromMeta } from "@/utils/thumb"
 
-import { Calendar, Fuel, Settings, ArrowLeft, Phone, MessageCircle, Gauge, MapPin, Shield } from "lucide-react"
+import { Calendar, Fuel, Settings, ArrowLeft, Phone, MessageCircle, Gauge, MapPin, Shield, ChevronLeft, ChevronRight } from "lucide-react"
 
 type VehicleImage =
   | string
@@ -155,6 +155,43 @@ export default function VehicleDetailsPage() {
     return r
   }, [vehicle])
 
+  const goPrevImage = useCallback(() => {
+    setSelectedImage((curr) => {
+      const len = thumbs.length
+      if (len <= 1) return curr
+      return (curr - 1 + len) % len
+    })
+  }, [thumbs.length])
+
+  const goNextImage = useCallback(() => {
+    setSelectedImage((curr) => {
+      const len = thumbs.length
+      if (len <= 1) return curr
+      return (curr + 1) % len
+    })
+  }, [thumbs.length])
+
+  useEffect(() => {
+    const len = thumbs.length
+    if (len <= 1) return
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault()
+        goPrevImage()
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault()
+        goNextImage()
+      } else if (e.key === "Escape" && isModalOpen) {
+        e.preventDefault()
+        setIsModalOpen(false)
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [goNextImage, goPrevImage, isModalOpen, thumbs.length])
+
   if (!loading && !vehicle) {
     return (
       <div>
@@ -285,6 +322,33 @@ export default function VehicleDetailsPage() {
                     onClick={() => setIsModalOpen(true)}
                     onError={() => setBrokenIdx(selectedImage)}
                   />
+
+                  {thumbs.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label="Imagem anterior"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-black/70 transition"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          goPrevImage()
+                        }}
+                      >
+                        <ChevronLeft className="h-6 w-6" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Próxima imagem"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-black/70 transition"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          goNextImage()
+                        }}
+                      >
+                        <ChevronRight className="h-6 w-6" />
+                      </button>
+                    </>
+                  )}
                 </div>
                 {thumbs.length > 1 && (
                   <div className="grid grid-cols-4 gap-2 p-4">
@@ -316,11 +380,36 @@ export default function VehicleDetailsPage() {
               <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center px-4" onClick={() => setIsModalOpen(false)}>
                 <div className="relative max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
                   <button onClick={() => setIsModalOpen(false)} className="absolute top-2 right-2 text-white text-2xl font-bold z-50">&times;</button>
+                  {originals.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label="Imagem anterior"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 z-50 h-11 w-11 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-black/70 transition"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          goPrevImage()
+                        }}
+                      >
+                        <ChevronLeft className="h-7 w-7" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Próxima imagem"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 z-50 h-11 w-11 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-black/70 transition"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          goNextImage()
+                        }}
+                      >
+                        <ChevronRight className="h-7 w-7" />
+                      </button>
+                    </>
+                  )}
                   <InnerImageZoom
                     src={originals[selectedImage]}
                     zoomSrc={originals[selectedImage]}
-                    zoomType="hover"
-                    zoomPreload
+                    zoomType="click"
                     className="rounded-lg"
                   />
                 </div>

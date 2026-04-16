@@ -229,9 +229,20 @@ export default function VeiculosPage() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredVehicles.map((vehicle) => (
                   <Card key={vehicle.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <CardImage src={vehicle.first_image_url} alt={vehicle.name} badge={vehicle.badge} />
+                    <Link
+                      href={`/veiculos/${vehicle.id}`}
+                      aria-label={`Abrir ${vehicle.name}`}
+                      className="block"
+                    >
+                      <CardImage src={vehicle.first_image_url} alt={vehicle.name} badge={vehicle.badge} />
+                    </Link>
                     <CardContent className="p-6">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{vehicle.name}</h3>
+                      <Link
+                        href={`/veiculos/${vehicle.id}`}
+                        className="hover:underline underline-offset-4"
+                      >
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{vehicle.name}</h3>
+                      </Link>
                       {vehicle.price && <div className="text-2xl font-bold text-red-600 mb-2">{vehicle.price}</div>}
                       {/* {vehicle.description && <p className="text-gray-600 text-sm mb-4 truncate">{vehicle.description}</p>} */}
                       <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-4">
