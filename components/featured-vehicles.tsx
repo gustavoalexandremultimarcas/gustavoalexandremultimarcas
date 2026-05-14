@@ -11,7 +11,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
-import { thumbUrlFromMeta } from "@/utils/thumb";
 
 type VehicleCard = {
   id: number;
@@ -26,8 +25,7 @@ type VehicleCard = {
   available: boolean;
   spotlight: boolean;
   first_image_url?: string | null;
-  /** <- acrescentado para usar o util existente */
-  first_image_meta?: any | null;
+  first_image_thumb_url?: string | null;
 };
 
 export function FeaturedVehicles() {
@@ -41,7 +39,6 @@ export function FeaturedVehicles() {
         setLoading(true);
         const res = await fetch(
           "/api/public/vehicles?availableOnly=1&spotlight=1&withFirstImage=1&limit=12",
-          { cache: "no-store" }
         );
         const json = await res.json();
         if (!active) return;
@@ -62,11 +59,10 @@ export function FeaturedVehicles() {
   }
 
   const renderCard = (vehicle: VehicleCard) => {
-    // usa sua função existente para gerar a thumb da Render API
-    const img = thumbUrlFromMeta(
-      vehicle.first_image_meta,
-      vehicle.first_image_url || "/images/placeholder.webp"
-    );
+    const img =
+      vehicle.first_image_thumb_url ||
+      vehicle.first_image_url ||
+      "/images/placeholder.webp";
 
     const isSvg = img.endsWith(".svg");
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { buildVehicleImageMeta } from "@/lib/vehicle-images";
+import { optimizeVehicleImage } from "@/lib/vehicle-image-optimizer";
 import crypto from "crypto";
 
 const MAX_IMAGES = 10;
@@ -146,27 +148,19 @@ async function uploadToStorage(
   vehicleId: number
 ): Promise<{ url: string; meta: any }> {
   const supabase = supabaseAdmin();
-  // preserva MIME/extensão real
-  const mime = file.type || "application/octet-stream";
-
-  const ext =
-    mime === "image/webp"
-      ? "webp"
-      : mime === "image/jpeg"
-      ? "jpg"
-      : mime === "image/png"
-      ? "png"
-      : "bin"; // fallback seguro (quase nunca cai aqui, pois filtramos antes)
+  const optimized = await optimizeVehicleImage(file);
+  const mime = optimized.mime;
+  const ext = optimized.ext;
 
   const filename = `${crypto.randomUUID()}.${ext}`;
   const path = `vehicles/${vehicleId}/${filename}`;
 
   const { error: uploadErr } = await supabase.storage
     .from("vehicles-media")
-    .upload(path, file, {
+    .upload(path, optimized.buffer, {
       contentType: mime,
       upsert: false,
-      cacheControl: "3600",
+      cacheControl: "31536000",
     });
 
   if (uploadErr) throw uploadErr;
@@ -175,25 +169,15 @@ async function uploadToStorage(
     .from("vehicles-media")
     .getPublicUrl(path);
 
-  const meta = {
-    bucket: "vehicles-media",
-    path, // caminho exato para futuras exclusões/reordenações
-    formats: [ext],
-    sources: {
-      original: {
-        url: pub.publicUrl,
-        size: file.size,
-        format: ext,
-      },
-    },
-    original: {
-      mime,
-      width: null,
-      height: null,
-    },
-    updated_at: new Date().toISOString(),
-    originalOnly: true,
-  };
+  const meta = buildVehicleImageMeta({
+    path,
+    publicUrl: pub.publicUrl,
+    mime,
+    size: optimized.size,
+    format: ext,
+    width: optimized.width,
+    height: optimized.height,
+  });
 
   return { url: pub.publicUrl, meta };
 }

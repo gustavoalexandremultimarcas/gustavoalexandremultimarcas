@@ -15,6 +15,11 @@ const nextConfig = {
         hostname: process.env.SUPABASE_HOSTNAME || 'localhost',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: process.env.SUPABASE_HOSTNAME || 'localhost',
+        pathname: '/storage/v1/render/image/public/**',
+      },
     ],
   },
 };

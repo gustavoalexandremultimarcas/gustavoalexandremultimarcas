@@ -25,6 +25,7 @@ type VehicleCard = {
   available: boolean;
   spotlight: boolean;
   first_image_url?: string | null;
+  first_image_thumb_url?: string | null;
 };
 
 export function EletricosVeiculos() {
@@ -39,7 +40,6 @@ export function EletricosVeiculos() {
         // elétricos disponíveis, com imagem; ajuste spotlight=1 se quiser só destaques
         const res = await fetch(
           "/api/public/vehicles?availableOnly=1&fuelIlike=el%C3%A9tric&withFirstImage=1&limit=12",
-          { cache: "no-store" }
         );
         const json = await res.json();
         if (!active) return;
@@ -56,7 +56,10 @@ export function EletricosVeiculos() {
   }, []);
 
   const renderCard = (vehicle: VehicleCard) => {
-    const img = vehicle.first_image_url || "/images/placeholder.webp";
+    const img =
+      vehicle.first_image_thumb_url ||
+      vehicle.first_image_url ||
+      "/images/placeholder.webp";
     const isSvg = img.endsWith(".svg");
     return (
       <div key={vehicle.id} className="w-full md:w-[330px] h-[500px] flex">

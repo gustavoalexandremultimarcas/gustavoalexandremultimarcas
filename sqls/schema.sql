@@ -86,3 +86,80 @@ CREATE TABLE public.admin_users (
 CREATE TRIGGER update_admin_users_updated_at BEFORE
 UPDATE ON admin_users FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column ();
+
+-- ========================================================
+-- SEGURANÇA: RLS, POLICIES E VIEW PÚBLICA
+-- ========================================================
+
+ALTER TABLE public.vehicles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vehicle_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vehicle_features ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.vehicles FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.vehicle_images FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.vehicle_features FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users FORCE ROW LEVEL SECURITY;
+
+-- Impede acesso direto de anon/authenticated às tabelas brutas.
+REVOKE ALL ON TABLE public.vehicles FROM anon, authenticated;
+REVOKE ALL ON TABLE public.vehicle_images FROM anon, authenticated;
+REVOKE ALL ON TABLE public.vehicle_features FROM anon, authenticated;
+REVOKE ALL ON TABLE public.admin_users FROM anon, authenticated;
+
+DROP POLICY IF EXISTS public_read_available_vehicles ON public.vehicles;
+CREATE POLICY public_read_available_vehicles
+ON public.vehicles
+FOR SELECT
+TO anon, authenticated
+USING (available = true);
+
+DROP POLICY IF EXISTS public_read_images_from_available_vehicles ON public.vehicle_images;
+CREATE POLICY public_read_images_from_available_vehicles
+ON public.vehicle_images
+FOR SELECT
+TO anon, authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.vehicles v
+    WHERE v.id = vehicle_images.vehicle_id
+      AND v.available = true
+  )
+);
+
+DROP VIEW IF EXISTS public.public_vehicle_catalog;
+CREATE VIEW public.public_vehicle_catalog AS
+SELECT
+  v.id,
+  v.name,
+  v.brand,
+  v.price,
+  v.year,
+  v.fuel,
+  v.transmission,
+  v.badge,
+  v.description,
+  v.km,
+  img.image_url AS first_image_url,
+  COALESCE(
+    img.image_meta -> 'variants' ->> 'card',
+    img.image_url
+  ) AS first_image_thumb_url
+FROM public.vehicles v
+LEFT JOIN LATERAL (
+  SELECT
+    vi.image_url,
+    vi.image_meta
+  FROM public.vehicle_images vi
+  WHERE vi.vehicle_id = v.id
+  ORDER BY vi.display_order ASC, vi.id ASC
+  LIMIT 1
+) img ON true
+WHERE v.available = true;
+
+REVOKE ALL ON TABLE public.public_vehicle_catalog FROM PUBLIC;
+GRANT SELECT ON TABLE public.public_vehicle_catalog TO anon, authenticated;
+
+COMMENT ON VIEW public.public_vehicle_catalog IS
+'Catálogo público somente leitura. Não expõe placa nem metadados administrativos.';

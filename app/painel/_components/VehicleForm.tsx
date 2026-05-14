@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { compressVehicleImageInBrowser } from "@/lib/vehicle-image-client";
 
 // importe do grid e do tipo (type-only import evita trazer valor)
 import { ImagesSortableGrid, type UiImage } from "./ImagesSortableGrid";
@@ -73,7 +74,7 @@ export default function VehicleForm({ vehicle }: VehicleFormProps) {
       const compactItems: Array<{ path: string; mime: string; size: number; ext: string }> = [];
 
       for (let i = 0; i < newFiles.length; i++) {
-        const file = newFiles[i];
+        const file = await compressVehicleImageInBrowser(newFiles[i]);
 
         // 1) pede URL assinada
         const sign = await fetch("/api/storage/sign-upload", {
@@ -87,7 +88,13 @@ export default function VehicleForm({ vehicle }: VehicleFormProps) {
         }
 
         // 2) sobe direto pro Storage (PUT)
-        const putRes = await fetch(sign.url, { method: "PUT", body: file });
+        const putRes = await fetch(sign.url, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "content-type": file.type || "image/webp",
+          },
+        });
         if (!putRes.ok) {
           throw new Error("Falha ao enviar imagem para o storage.");
         }
@@ -104,7 +111,7 @@ export default function VehicleForm({ vehicle }: VehicleFormProps) {
 
         compactItems.push({
           path: sign.path,
-          mime: file.type,
+          mime: file.type || "image/webp",
           size: file.size,
           ext,
         });
@@ -385,7 +392,7 @@ export default function VehicleForm({ vehicle }: VehicleFormProps) {
       {/* Imagens (com drag & drop) */}
       <div className="bg-white rounded-xl border shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 pb-2 border-b mb-4">
-          Imagens (máximo 10) - Formato .webp recomendado
+          Imagens (máximo 10) - otimizadas automaticamente no envio
         </h2>
 
         <ImagesSortableGrid

@@ -58,7 +58,7 @@ function SortableThumb({
   const isLocalPreview = !!item.file; // blob: (novo upload)
 
   // para imagens persistidas no banco, usamos a thumb via render API (com fallback para a URL original)
-  const remoteSrc = thumbUrlFromMeta(item.meta, item.url || PLACEHOLDER);
+  const remoteSrc = thumbUrlFromMeta(item.meta, item.url || PLACEHOLDER, "tile");
 
   // estado local para tratar fallback de erro no <Image>
   const [displaySrc, setDisplaySrc] = useState<string>(
@@ -67,7 +67,7 @@ function SortableThumb({
 
   useEffect(() => {
     // se o item mudar (ex.: reordenação/replace), recalcula o src
-    const next = isLocalPreview ? (item.url || PLACEHOLDER) : (thumbUrlFromMeta(item.meta, item.url || PLACEHOLDER));
+    const next = isLocalPreview ? (item.url || PLACEHOLDER) : (thumbUrlFromMeta(item.meta, item.url || PLACEHOLDER, "tile"));
     setDisplaySrc(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.id, item.url, item.meta, isLocalPreview]);

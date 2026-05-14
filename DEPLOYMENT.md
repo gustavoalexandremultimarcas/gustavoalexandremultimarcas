@@ -64,6 +64,23 @@ Originalmente, o projeto utilizava o **n8n** para processar esses dados e realiz
 ### Estrutura de Dados
 Toda a estrutura de tabelas, índices e triggers deve ser criada executando o SQL localizado em `sqls/schema.sql`.
 
+### Segurança obrigatória
+- O schema versionado agora habilita `RLS` nas tabelas `vehicles`, `vehicle_images`, `vehicle_features` e `admin_users`.
+- O acesso público deve acontecer pelo catálogo público versionado em `public.public_vehicle_catalog` ou pela API Next em `app/api/public/vehicles/route.ts`.
+- A tabela `admin_users` não deve receber grants para `anon` nem `authenticated`.
+- Não utilize `NEXT_PUBLIC_SUPABASE_ANON_KEY` no frontend enquanto o consumo não estiver restrito a views/policies explicitamente públicas. O app atual usa apenas rotas servidoras com `SUPABASE_SERVICE_ROLE_KEY`.
+
+### Storage e imagens
+- O bucket `vehicles-media` foi padronizado para URLs públicas imutáveis com nomes aleatórios e `cacheControl` longo (`31536000`).
+- Cada imagem enviada passa a receber metadados com variantes (`card`, `tile`, `detail`, `gallery`). O frontend público deve sempre preferir essas variantes em vez da URL original.
+- Recomendação operacional: manter uploads entre `WEBP/JPG/PNG` com alvo de até `1600px` no maior lado e, sempre que possível, abaixo de `500 KB` por arquivo para reduzir egress.
+- Se houver abuso de hotlink, a próxima etapa recomendada é migrar o bucket para privado e servir imagens com URL assinada via backend.
+
+### Cache e consumo de banda
+- A rota pública `GET /api/public/vehicles` envia `Cache-Control: public, s-maxage=300, stale-while-revalidate=86400`.
+- Evite adicionar `cache: "no-store"` nos consumidores públicos sem necessidade. O padrão deve ser reaproveitar o cache da rota.
+- Consultas de apoio global, como a checagem de veículos elétricos no header, devem usar cache curto no servidor para não bater no banco a cada montagem da UI.
+
 ### Criação de Administrador
 Para criar o primeiro usuário administrativo, você deve inserir manualmente na tabela `admin_users` ou utilizar uma ferramenta de sua preferência para gerar o hash da senha (bcrypt) e inserir o registro.
 

@@ -3,12 +3,8 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { buildVehicleImageMeta } from "@/lib/vehicle-images";
 
 const MAX_IMAGES = 10;
 
@@ -17,6 +13,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
   try {
+    const supabase = supabaseAdmin();
     const { vehicleId, items } = await req.json();
     if (!vehicleId || !Array.isArray(items) || !items.length) {
       return NextResponse.json({ error: "Payload inválido" }, { status: 400 });
@@ -70,21 +67,13 @@ export async function POST(req: Request) {
       return {
         vehicle_id: vehicleId,
         image_url: pub.publicUrl,
-        image_meta: {
-          bucket: "vehicles-media",
+        image_meta: buildVehicleImageMeta({
           path: it.path,
-          formats: [it.ext || "webp"],
-          sources: {
-            original: {
-              url: pub.publicUrl,
-              size: it.size ?? null,
-              format: it.ext || "webp",
-            },
-          },
-          original: { mime: it.mime ?? "image/webp", width: null, height: null },
-          updated_at: new Date().toISOString(),
-          originalOnly: true,
-        },
+          publicUrl: pub.publicUrl,
+          mime: it.mime ?? "image/webp",
+          size: it.size ?? null,
+          format: it.ext || "webp",
+        }),
         display_order: already + idx,
       };
     });

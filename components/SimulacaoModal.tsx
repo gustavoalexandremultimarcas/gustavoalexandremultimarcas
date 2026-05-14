@@ -9,9 +9,40 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 type VehicleOption = {
   id: number;
   name: string;
-  placa: string | null;
-  available: boolean;
 };
+
+const VEHICLE_OPTIONS_TTL_MS = 5 * 60 * 1000;
+
+let cachedVehicleOptions: VehicleOption[] | null = null;
+let cachedVehicleOptionsAt = 0;
+let cachedVehicleOptionsPromise: Promise<VehicleOption[]> | null = null;
+
+async function fetchVehicleOptions() {
+  const now = Date.now();
+  if (cachedVehicleOptions && now - cachedVehicleOptionsAt < VEHICLE_OPTIONS_TTL_MS) {
+    return cachedVehicleOptions;
+  }
+
+  if (!cachedVehicleOptionsPromise) {
+    cachedVehicleOptionsPromise = fetch("/api/public/vehicles?summary=1")
+      .then(async (res) => {
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(t || `HTTP ${res.status}`);
+        }
+
+        const json = await res.json();
+        cachedVehicleOptions = (json?.vehicles ?? []) as VehicleOption[];
+        cachedVehicleOptionsAt = Date.now();
+        return cachedVehicleOptions;
+      })
+      .finally(() => {
+        cachedVehicleOptionsPromise = null;
+      });
+  }
+
+  return cachedVehicleOptionsPromise;
+}
 
 export function SimulacaoModal({
   isOpen,
@@ -36,16 +67,9 @@ export function SimulacaoModal({
       try {
         setLoading(true);
         setLoadError(null);
-        const res = await fetch("/api/public/vehicles?availableOnly=1", {
-          cache: "no-store",
-        });
-        if (!res.ok) {
-          const t = await res.text();
-          throw new Error(t || `HTTP ${res.status}`);
-        }
-        const json = await res.json();
+        const options = await fetchVehicleOptions();
         if (!active) return;
-        setVeiculos((json?.vehicles ?? []) as VehicleOption[]);
+        setVeiculos(options);
       } catch (e: any) {
         if (!active) return;
         setLoadError(e?.message || "Falha ao carregar veículos");
@@ -100,7 +124,6 @@ export function SimulacaoModal({
       veiculoNome: veiculoSelecionado?.name,
       cnh: data.cnh,
       valorEntrada: data.valorEntrada,
-      placa: veiculoSelecionado?.placa || "",
     };
 
     try {

@@ -39,7 +39,6 @@ export function Footer({ onOpenSimulacaoModal, onOpenConsignarModal }: FooterPro
                 width={400}
                 height={400}
                 className="h-[200px] md:h-[200px] w-auto object-contain"
-                priority
               />
             </div>
             <div className="text-center md:text-left">

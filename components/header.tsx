@@ -12,7 +12,12 @@ import { SimulacaoModal } from "@/components/SimulacaoModal"
 import { ConsignarVeiculoForm } from "@/components/consignacao-veiculos"
 import { STORE_PHONE, STORE_ADDRESS, STORE_CITY_STATE, STORE_FACEBOOK_LINK, STORE_INSTAGRAM_LINK, STORE_WHATSAPP_LINK } from "@/lib/config"
 
-export function Header() {
+type HeaderProps = {
+  onOpenSimulacaoModal?: () => void
+  onOpenConsignarModal?: () => void
+}
+
+export function Header({ onOpenSimulacaoModal, onOpenConsignarModal }: HeaderProps) {
   const [showSimulacaoModal, setShowSimulacaoModal] = useState(false)
   const [showConsignarModal, setShowConsignarModal] = useState(false)
   const pathname = usePathname()
@@ -25,6 +30,11 @@ export function Header() {
       hasElectricVehicles().then(setShowElectric)
     })
   }, [])
+
+  const openSimulacaoModal = onOpenSimulacaoModal ?? (() => setShowSimulacaoModal(true))
+  const openConsignarModal = onOpenConsignarModal ?? (() => setShowConsignarModal(true))
+  const renderInternalSimulacaoModal = !onOpenSimulacaoModal
+  const renderInternalConsignarModal = !onOpenConsignarModal
 
   const handleAnchorNavigation = (id: string) => {
     if (pathname !== "/") {
@@ -104,7 +114,7 @@ export function Header() {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault()
-                    setShowSimulacaoModal(true)
+                    openSimulacaoModal()
                   }}
                   className="hover:text-red-500 transition-colors cursor-pointer"
                 >
@@ -114,7 +124,7 @@ export function Header() {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault()
-                    setShowConsignarModal(true)
+                    openConsignarModal()
                   }}
                   className="hover:text-red-500 transition-colors cursor-pointer"
                 >
@@ -150,23 +160,27 @@ export function Header() {
           {/* Menu mobile abaixo do header */}
           <MobileMenu
             showElectric={showElectric}
-            onOpenSimulacaoModal={() => setShowSimulacaoModal(true)}
-            onOpenConsignarModal={() => setShowConsignarModal(true)}
+            onOpenSimulacaoModal={openSimulacaoModal}
+            onOpenConsignarModal={openConsignarModal}
           />
 
         </div>
       </header>
 
       {/* Modal de Simulação */}
-      <SimulacaoModal
-        isOpen={showSimulacaoModal}
-        onClose={() => setShowSimulacaoModal(false)}
-      />
+      {renderInternalSimulacaoModal && (
+        <SimulacaoModal
+          isOpen={showSimulacaoModal}
+          onClose={() => setShowSimulacaoModal(false)}
+        />
+      )}
 
-      <ConsignarVeiculoForm
-        isOpen={showConsignarModal}
-        onClose={() => setShowConsignarModal(false)}
-      />
+      {renderInternalConsignarModal && (
+        <ConsignarVeiculoForm
+          isOpen={showConsignarModal}
+          onClose={() => setShowConsignarModal(false)}
+        />
+      )}
     </>
   )
 }

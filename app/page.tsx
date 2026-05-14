@@ -9,7 +9,6 @@ import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 import { SimulacaoModal } from "@/components/SimulacaoModal"
 import { ConsignarVeiculoForm } from "@/components/consignacao-veiculos"
-import { EletricosVeiculos } from "@/components/eletricos-veiculos"
 
 export default function Home() {
   const [showSimulacaoModal, setShowSimulacaoModal] = useState(false)
@@ -17,7 +16,10 @@ export default function Home() {
 
   return (
     <main>
-      <Header />
+      <Header
+        onOpenSimulacaoModal={() => setShowSimulacaoModal(true)}
+        onOpenConsignarModal={() => setShowConsignarModal(true)}
+      />
       <HeroSection />      
       <FeaturedVehicles />
       <ServicesSection />

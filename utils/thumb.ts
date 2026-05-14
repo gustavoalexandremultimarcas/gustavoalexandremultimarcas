@@ -1,12 +1,20 @@
-// utils/thumb.ts
-export function thumbUrlFromMeta(meta?: any, fallback?: string) {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const path = meta?.path as string | undefined;
-  if (base && path) {
-    // render API do Supabase
-    return `${base}/storage/v1/render/image/public/vehicles-media/${encodeURIComponent(
-      path
-    )}?quality=70`;
-  }
-  return fallback || "/images/placeholder.webp";
+import {
+  getVehicleImageOriginal,
+  getVehicleImageVariant,
+  type VehicleImageMeta,
+} from "@/lib/vehicle-images";
+
+export function thumbUrlFromMeta(
+  meta?: Partial<VehicleImageMeta> | null,
+  fallback?: string,
+  variant: "card" | "tile" | "gallery" | "detail" = "card"
+) {
+  return getVehicleImageVariant(meta, variant, fallback);
+}
+
+export function originalUrlFromMeta(
+  meta?: Partial<VehicleImageMeta> | null,
+  fallback?: string
+) {
+  return getVehicleImageOriginal(meta, fallback);
 }

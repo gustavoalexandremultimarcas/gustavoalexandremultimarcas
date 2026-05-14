@@ -29,33 +29,30 @@ type PublicVehicle = {
   available: boolean
   spotlight: boolean
   first_image_url?: string | null
+  first_image_thumb_url?: string | null
   km?: string | null
 }
 
 const PLACEHOLDER = "/images/placeholder.webp"
 
 /** Imagem do card com fallback + key por src para forçar re-render seguro */
-function CardImage({ src, alt, badge }: { src?: string | null; alt: string; badge?: string | null }) {
-  // tenta converter a URL pública do Supabase para a URL de render (thumb)
-  const toRenderUrl = (u?: string | null) => {
-    if (!u) return PLACEHOLDER
-    // casa: https://<host>/storage/v1/object/public/vehicles-media/<path>
-    const m = u.match(/^(https?:\/\/[^/]+)\/storage\/v1\/object\/public\/(vehicles-media\/.+)$/)
-    if (!m) return u
-    // devolve render com width/quality (thumb)
-    return `${m[1]}/storage/v1/render/image/public/${m[2]}?quality=75`
-  }
-
-  const original = src || PLACEHOLDER
-  const renderSrc = toRenderUrl(src)
-
-  const [currentSrc, setCurrentSrc] = useState(renderSrc)
+function CardImage({
+  src,
+  fallbackSrc,
+  alt,
+  badge,
+}: {
+  src?: string | null
+  fallbackSrc?: string | null
+  alt: string
+  badge?: string | null
+}) {
+  const original = fallbackSrc || src || PLACEHOLDER
+  const [currentSrc, setCurrentSrc] = useState(src || original)
 
   useEffect(() => {
-    // sempre que o src mudar, recalcula a tentativa de thumb
-    setCurrentSrc(toRenderUrl(src))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src])
+    setCurrentSrc(src || original)
+  }, [original, src])
 
   return (
     <div className="w-full aspect-[1270/953] relative overflow-hidden">
@@ -99,7 +96,7 @@ export default function VeiculosPage() {
       ; (async () => {
         try {
           setLoading(true)
-          const res = await fetch("/api/public/vehicles?availableOnly=1&withFirstImage=1", { cache: "no-store" })
+          const res = await fetch("/api/public/vehicles?availableOnly=1&withFirstImage=1")
           const json = await res.json()
           if (!active) return
           setAllVehicles((json?.vehicles ?? []) as PublicVehicle[])
@@ -234,7 +231,12 @@ export default function VeiculosPage() {
                       aria-label={`Abrir ${vehicle.name}`}
                       className="block"
                     >
-                      <CardImage src={vehicle.first_image_url} alt={vehicle.name} badge={vehicle.badge} />
+                      <CardImage
+                        src={vehicle.first_image_thumb_url}
+                        fallbackSrc={vehicle.first_image_url}
+                        alt={vehicle.name}
+                        badge={vehicle.badge}
+                      />
                     </Link>
                     <CardContent className="p-6">
                       <Link

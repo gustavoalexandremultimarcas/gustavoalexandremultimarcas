@@ -18,15 +18,13 @@ import InnerImageZoom from "react-inner-image-zoom"
 import "react-inner-image-zoom/lib/InnerImageZoom/styles.css"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { STORE_WHATSAPP_LINK, STORE_PHONE, STORE_ADDRESS, STORE_CITY_STATE } from "@/lib/config"
-import { thumbUrlFromMeta } from "@/utils/thumb"
 
 import { Calendar, Fuel, Settings, ArrowLeft, Phone, MessageCircle, Gauge, MapPin, Shield, ChevronLeft, ChevronRight } from "lucide-react"
 
 type VehicleImage =
-  | string
   | {
       image_url: string
-      image_meta?: any
+      thumb_url?: string | null
     }
 
 type PublicVehicle = {
@@ -43,9 +41,7 @@ type PublicVehicle = {
   spotlight: boolean
   km?: string | null
   first_image_url?: string | null
-  /** se o endpoint já devolver, aproveitamos para gerar a thumb */
-  first_image_meta?: any | null
-  /** pode vir como array de urls OU como objetos com meta */
+  first_image_thumb_url?: string | null
   images?: VehicleImage[]
 }
 
@@ -89,7 +85,6 @@ export default function VehicleDetailsPage() {
       try {
         setLoading(true)
         const res = await fetch(`/api/public/vehicles?id=${encodeURIComponent(String(vehicleId))}&withImages=1`, {
-          cache: "no-store",
         })
         const json = await res.json()
         if (!active) return
@@ -116,11 +111,6 @@ export default function VehicleDetailsPage() {
     }
   }, [isModalOpen])
 
-  /**
-   * Normaliza as imagens:
-   * - thumbs: URLs geradas via Render API (quando houver meta) ou fallback para image_url / first_image_url
-   * - originals: URLs originais (image_url ou first_image_url)
-   */
   const { thumbs, originals } = useMemo(() => {
     const PLACE = "/images/placeholder.webp"
     const r = { thumbs: [] as string[], originals: [] as string[] }
@@ -130,23 +120,18 @@ export default function VehicleDetailsPage() {
     // caso a API retorne a lista completa
     if (vehicle.images && vehicle.images.length) {
       for (const it of vehicle.images) {
-        if (typeof it === "string") {
-          r.thumbs.push(it || PLACE)
-          r.originals.push(it || PLACE)
-        } else {
-          const orig = it.image_url || PLACE
-          const thumb = thumbUrlFromMeta(it.image_meta, orig)
-          r.thumbs.push(thumb || PLACE)
-          r.originals.push(orig)
-        }
+        const orig = it.image_url || PLACE
+        const thumb = it.thumb_url || orig
+        r.thumbs.push(thumb || PLACE)
+        r.originals.push(orig)
       }
       return r
     }
 
     // fallback: só a primeira imagem
-    if (vehicle.first_image_url || vehicle.first_image_meta) {
+    if (vehicle.first_image_url || vehicle.first_image_thumb_url) {
       const orig = vehicle.first_image_url || PLACE
-      const thumb = thumbUrlFromMeta(vehicle.first_image_meta, orig)
+      const thumb = vehicle.first_image_thumb_url || orig
       r.thumbs.push(thumb || PLACE)
       r.originals.push(orig)
       return r
@@ -315,6 +300,7 @@ export default function VehicleDetailsPage() {
                     src={safeSrc(thumbs[selectedImage])}
                     alt={`${vehicle.name} - imagem ${selectedImage + 1}`}
                     fill
+                    priority={selectedImage === 0}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
                     // pular otimização para evitar edge cases com URLs remotas
                     unoptimized

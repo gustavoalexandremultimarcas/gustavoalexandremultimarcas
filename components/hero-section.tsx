@@ -5,6 +5,7 @@ import { Card, CardContent } from "../components/ui/card"
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Textarea } from "../components/ui/textarea"
+import Image from "next/image"
 import { ChevronRight, Car, Shield, CreditCard, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import React from "react"
@@ -98,10 +99,13 @@ export function HeroSection() {
     <section className="relative w-full overflow-hidden text-white">
       {/* Imagem de fundo responsiva */}
       <div className="absolute inset-0 z-[-1]">
-        <img
+        <Image
           src="/images/Fundobanner.webp" // substitua pelo caminho correto da imagem
           alt="Banner de veículo esportivo"
-          className="w-full h-[600px] sm:h-[900px] object-cover"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
         />
         {/* Overlay escuro opcional */}
         <div className="absolute inset-0 bg-black/40" />

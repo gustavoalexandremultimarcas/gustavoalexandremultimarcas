@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { buildVehicleImageMeta } from "@/lib/vehicle-images";
+import { optimizeVehicleImage } from "@/lib/vehicle-image-optimizer";
 import crypto from "crypto";
 
 export async function PUT(
@@ -203,15 +205,19 @@ async function uploadToStorage(
   vehicleId: number
 ): Promise<{ url: string; meta: any }> {
   const supabase = supabaseAdmin();
-  const filename = `${crypto.randomUUID()}.webp`;
+  const optimized = await optimizeVehicleImage(file);
+  const mime = optimized.mime;
+  const ext = optimized.ext;
+
+  const filename = `${crypto.randomUUID()}.${ext}`;
   const path = `vehicles/${vehicleId}/${filename}`;
 
   const { error } = await supabase.storage
     .from("vehicles-media")
-    .upload(path, file, {
-      contentType: "image/webp",
+    .upload(path, optimized.buffer, {
+      contentType: mime,
       upsert: false,
-      cacheControl: "3600",
+      cacheControl: "31536000",
     });
 
   if (error) throw error;
@@ -220,25 +226,15 @@ async function uploadToStorage(
     .from("vehicles-media")
     .getPublicUrl(path);
 
-  const meta = {
-    bucket: "vehicles-media",
-    path, // caminho exato p/ futuras exclusões
-    formats: ["webp"],
-    sources: {
-      original: {
-        url: pub.publicUrl,
-        size: file.size,
-        format: "webp",
-      },
-    },
-    original: {
-      mime: "image/webp",
-      width: null,
-      height: null,
-    },
-    updated_at: new Date().toISOString(),
-    originalOnly: true,
-  };
+  const meta = buildVehicleImageMeta({
+    path,
+    publicUrl: pub.publicUrl,
+    mime,
+    size: optimized.size,
+    format: ext,
+    width: optimized.width,
+    height: optimized.height,
+  });
 
   return { url: pub.publicUrl, meta };
 }
